@@ -1,4 +1,7 @@
 Editando archivo para ver git tags
 Editando para hacer commit y trabajar en una practica para ramificar y fusionar
 
+#Fusionado
 Segundo cambio desde rama hotfix
+Editando en rama issue#53 para ejercicio ramificar y fusionar
+Cambiando archivo antes de cambiar de rama, no me dejo cambiar de rama jajaja
