@@ -1,2 +1,4 @@
 Editando archivo para ver git tags
 Editando para hacer commit y trabajar en una practica para ramificar y fusionar
+
+Segundo cambio desde rama hotfix
