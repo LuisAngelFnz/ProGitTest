@@ -1,2 +1,5 @@
 Editando archivo para ver git tags
 Editando para hacer commit y trabajar en una practica para ramificar y fusionar
+
+Editando en rama issue#53 para ejercicio ramificar y fusionar
+
