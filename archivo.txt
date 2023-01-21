@@ -8,3 +8,5 @@ Cambiando archivo antes de cambiar de rama, no me dejo cambiar de rama jajaja
 
 Editango para probar si salen las ramas editando la master con el comando git branch --merged
 Editando rama main para adelantarla a rama test_rebase
+
+Editando en rama main para adelantarla y realizar ejemplo de rebase desde una rama puntual de otra rama puntual
