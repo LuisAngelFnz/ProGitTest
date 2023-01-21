@@ -1,1 +1,2 @@
 2) Editando en rama puntual_client_from_server archivo client.txt, ejercicio rebase
+2) Editando para commit 2
