@@ -10,3 +10,5 @@ Editango para probar si salen las ramas editando la master con el comando git br
 Editando rama main para adelantarla a rama test_rebase
 
 Editando en rama main para adelantarla y realizar ejemplo de rebase desde una rama puntual de otra rama puntual
+
+Rama main despues de crear rama server
