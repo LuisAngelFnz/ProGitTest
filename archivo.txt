@@ -1,1 +1,16 @@
 Editando archivo para ver git tags
+Editando para hacer commit y trabajar en una practica para ramificar y fusionar
+
+#Fusionado
+Segundo cambio desde rama hotfix
+Editando en rama issue#53 para ejercicio ramificar y fusionar
+Cambiando archivo antes de cambiar de rama, no me dejo cambiar de rama jajaja
+
+Editango para probar si salen las ramas editando la master con el comando git branch --merged
+Editando rama main para adelantarla a rama test_rebase
+
+Editando en rama main para adelantarla y realizar ejemplo de rebase desde una rama puntual de otra rama puntual
+
+Rama main despues de crear rama server
+Editando desde client
+Editando desde rama server

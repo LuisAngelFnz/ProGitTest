@@ -1,0 +1,2 @@
+Nuevo controlador del problema a resolver de issue #53
+Editando en rama test_rebase para ejemplo de rebase
