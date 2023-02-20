@@ -5,3 +5,10 @@ Linea 2 Si
 Linea 3 Si
 Linea 4 No
 Linea 5 No
+
+
+Otro grupo de lineas
+A
+B
+C
+D
