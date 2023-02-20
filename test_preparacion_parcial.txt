@@ -1,7 +1,7 @@
 Preparación parcial
 
-Linea 1 Si
-Linea 2 No
-Linea 3 No
-Linea 4 Si
-Linea 5 Si
+Linea 1 No
+Linea 2 Si
+Linea 3 Si
+Linea 4 No
+Linea 5 No
