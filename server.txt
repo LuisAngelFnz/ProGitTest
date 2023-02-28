@@ -3,4 +3,5 @@
 
 Editando desde rama server
 Editando en main para comparar en DEV
-Probante git add -i
+Probando git add -i
+Editando en rama DEV para  ver comando git stash
