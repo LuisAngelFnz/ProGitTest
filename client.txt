@@ -2,3 +2,5 @@
 2) Editando para commit 2
 
 Editando desde client
+Editando para ver git stash branch NombreRama
+
