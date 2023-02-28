@@ -3,3 +3,4 @@
 
 Editando desde rama server
 Editando en main para comparar en DEV
+Editando en rama DEV para  ver comando git stash
