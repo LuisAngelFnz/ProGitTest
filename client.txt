@@ -4,3 +4,10 @@
 Editando desde client
 Editando para ver git stash branch NombreRama
 
+
+(Trabajando con submodulos) Editando proyecto hijo y padre pero solo enviando push en proyecto padre
+
+
+
+
+
