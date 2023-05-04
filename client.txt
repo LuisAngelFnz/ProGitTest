@@ -10,4 +10,4 @@ Editando para ver git stash branch NombreRama
 
 
 
-
+Modificacion para probar attributes merge=ours
