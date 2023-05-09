@@ -1,0 +1,204 @@
+#!/usr/bin/env ruby
+
+$refname = ARGV[0]
+$oldrev  = ARGV[1]
+$newrev  = ARGV[2]
+$user    = ENV['USER']
+
+puts "Comenzado politicas del Repositorio..."
+puts "Rama: #{$refname} Commit anterior: #{$oldrev[0,6]} Commit actual: #{$newrev[0,6]} Usuario: #{$user}"
+
+def get_acl(acl_path)
+	acl_lines = File.read(acl_path).split("\n").reject { |e| e == ''}
+	acl_dict  = {}
+	acl_lines.each do |line|
+		avail, users, path = line.split('|')
+		next unless avail == 'avail'
+		users.split(',').each do |usereach|
+			acl_dict[usereach] ||= []
+			acl_dict[usereach] << path
+		end
+	end
+	acl_dict
+end
+
+def check_directory_perms
+	acl = get_acl('acl')
+	new_commits = `git rev-list #{$oldrev}..#{$newrev}`.split("\n")
+	new_commits.each do |each_commit|
+		files_modifed = `git log -1 --name-only --pretty='' #{each_commit}`.split("\n")
+		files_modifed.each do |each_path|
+			next if each_path.size == 0
+			filepath = File.dirname(each_path)
+			has_file_access = false
+			
+			if acl.key?($user) and !acl[$user].nil?
+				
+				acl[$user].each do |acl_path|
+					if acl_path.nil? or acl_path.size == 0
+						acl_path = '.'
+					end
+					next if acl_path.index(each_path) == 0
+					has_file_access = true
+				end
+
+			end
+
+			if !has_file_access
+				puts "[Politica] Tu no tienes permisos para hacer push a #{each_path}"
+				exit 1
+			end
+		end
+	end
+end
+check_directory_perms
+
+$regex = /.*/
+def check_message_format
+	missed_revs = `git rev-list #{$oldrev[0,6]}...#{$newrev[0,6]}`.split("\n")
+	missed_revs.each do |eachrev|
+		message = `git cat-file commit #{eachrev} | sed '1,/^$/d'`
+		if !$regex.match(message)
+			puts "[Politica] Tu mensaje del commit #{eachrev[0,6]} no tiene un formato correcto"
+			exit 1
+		end
+	end
+end
+check_message_format
+
+def check_fast_forward
+	missed_ref_count = `git rev-list #{$newrev}..#{$oldrev}`.split("\n").size
+	if missed_ref_count > 0
+		puts "[Politica] No se pueden realizar push que no sean referencias Fast-Forward"
+		exit 1
+	end
+end
+check_fast_forward
+#
+# An example hook script to block unannotated tags from entering.
+# Called by "git receive-pack" with arguments: refname sha1-old sha1-new
+#
+# To enable this hook, rename this file to "update".
+#
+# Config
+# ------
+# hooks.allowunannotated
+#   This boolean sets whether unannotated tags will be allowed into the
+#   repository.  By default they won't be.
+# hooks.allowdeletetag
+#   This boolean sets whether deleting tags will be allowed in the
+#   repository.  By default they won't be.
+# hooks.allowmodifytag
+#   This boolean sets whether a tag may be modified after creation. By default
+#   it won't be.
+# hooks.allowdeletebranch
+#   This boolean sets whether deleting branches will be allowed in the
+#   repository.  By default they won't be.
+# hooks.denycreatebranch
+#   This boolean sets whether remotely creating branches will be denied
+#   in the repository.  By default this is allowed.
+#
+
+# --- Command line
+# refname="$1"
+# oldrev="$2"
+# newrev="$3"
+
+# # --- Safety check
+# if [ -z "$GIT_DIR" ]; then
+# 	echo "Don't run this script from the command line." >&2
+# 	echo " (if you want, you could supply GIT_DIR then run" >&2
+# 	echo "  $0 <ref> <oldrev> <newrev>)" >&2
+# 	exit 1
+# fi
+
+# if [ -z "$refname" -o -z "$oldrev" -o -z "$newrev" ]; then
+# 	echo "usage: $0 <ref> <oldrev> <newrev>" >&2
+# 	exit 1
+# fi
+
+# # --- Config
+# allowunannotated=$(git config --type=bool hooks.allowunannotated)
+# allowdeletebranch=$(git config --type=bool hooks.allowdeletebranch)
+# denycreatebranch=$(git config --type=bool hooks.denycreatebranch)
+# allowdeletetag=$(git config --type=bool hooks.allowdeletetag)
+# allowmodifytag=$(git config --type=bool hooks.allowmodifytag)
+
+# # check for no description
+# projectdesc=$(sed -e '1q' "$GIT_DIR/description")
+# case "$projectdesc" in
+# "Unnamed repository"* | "")
+# 	echo "*** Project description file hasn't been set" >&2
+# 	exit 1
+# 	;;
+# esac
+
+# # --- Check types
+# # if $newrev is 0000...0000, it's a commit to delete a ref.
+# zero=$(git hash-object --stdin </dev/null | tr '[0-9a-f]' '0')
+# if [ "$newrev" = "$zero" ]; then
+# 	newrev_type=delete
+# else
+# 	newrev_type=$(git cat-file -t $newrev)
+# fi
+
+# case "$refname","$newrev_type" in
+# 	refs/tags/*,commit)
+# 		# un-annotated tag
+# 		short_refname=${refname##refs/tags/}
+# 		if [ "$allowunannotated" != "true" ]; then
+# 			echo "*** The un-annotated tag, $short_refname, is not allowed in this repository" >&2
+# 			echo "*** Use 'git tag [ -a | -s ]' for tags you want to propagate." >&2
+# 			exit 1
+# 		fi
+# 		;;
+# 	refs/tags/*,delete)
+# 		# delete tag
+# 		if [ "$allowdeletetag" != "true" ]; then
+# 			echo "*** Deleting a tag is not allowed in this repository" >&2
+# 			exit 1
+# 		fi
+# 		;;
+# 	refs/tags/*,tag)
+# 		# annotated tag
+# 		if [ "$allowmodifytag" != "true" ] && git rev-parse $refname > /dev/null 2>&1
+# 		then
+# 			echo "*** Tag '$refname' already exists." >&2
+# 			echo "*** Modifying a tag is not allowed in this repository." >&2
+# 			exit 1
+# 		fi
+# 		;;
+# 	refs/heads/*,commit)
+# 		# branch
+# 		if [ "$oldrev" = "$zero" -a "$denycreatebranch" = "true" ]; then
+# 			echo "*** Creating a branch is not allowed in this repository" >&2
+# 			exit 1
+# 		fi
+# 		;;
+# 	refs/heads/*,delete)
+# 		# delete branch
+# 		if [ "$allowdeletebranch" != "true" ]; then
+# 			echo "*** Deleting a branch is not allowed in this repository" >&2
+# 			exit 1
+# 		fi
+# 		;;
+# 	refs/remotes/*,commit)
+# 		# tracking branch
+# 		;;
+# 	refs/remotes/*,delete)
+# 		# delete tracking branch
+# 		if [ "$allowdeletebranch" != "true" ]; then
+# 			echo "*** Deleting a tracking branch is not allowed in this repository" >&2
+# 			exit 1
+# 		fi
+# 		;;
+# 	*)
+# 		# Anything else (is there anything else?)
+# 		echo "*** Update hook: unknown type of update to ref $refname of type $newrev_type" >&2
+# 		exit 1
+# 		;;
+# esac
+
+# # --- Finished
+# exit 0
+
