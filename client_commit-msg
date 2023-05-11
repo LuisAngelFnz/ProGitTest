@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+exit 1
+message_file = ARGV[0]
+message = File.read(message_file)
+$regex = /.*/
+if !$regex.match(message)
+  puts "[Politica] El mensaje de tu commit no tiene un formato correcto"
+  exit 1
+end
+puts 'commit-msg OK'
+# import sys
+# import re
+
+# file = open(sys.argv[1])
+# message = file.read()
+# file.close()
+
+# if not re.search('.*'):
+#     print('[Politica] El mensaje de tu commit no tiene un formato correcto')
+#     sys.exit(1)
+# print('commit-msg OK')
+

@@ -1,0 +1,132 @@
+#!/usr/bin/env ruby
+
+$user = ENV['USER']
+
+def get_acl(acl_path)
+    acl_dict = {}
+    File.read(acl_path).split("\n").each do |line|
+        next unless line != ''
+        avail, users, path = line.split('|')
+        #puts "avail: #{avail} users: #{users} path: #{path}"
+        next unless avail == 'avail'
+        if path.nil?
+            path = '.'
+        end
+        users.split(',').each do |usereach|
+            acl_dict[usereach] ||= []
+            acl_dict[usereach] << path
+        end
+    end
+    acl_dict
+end
+
+def check_directory_perms
+    acl = get_acl('.git/acl')
+    if !acl.key?($user)
+        puts "USER: #{$user} no se encuentra configurado en los permisos"
+        exit 1
+    end
+    files_modifed = `git diff-index --cached --name-only HEAD`.split("\n")
+    files_modifed.each do |each_path|
+        next if each_path.size == 0
+        filepath = File.dirname(each_path)
+        has_file_access = false
+        acl[$user].each do |acl_path|
+            next if acl_path.index(each_path) == 0
+            has_file_access = true
+        end
+        if !has_file_access
+            puts "[Politica] Tu no tienes permisos para hacer push a #{each_path}"
+            exit 1
+        end
+    end
+end
+check_directory_perms
+
+base_branch = ARGV[0]
+if ARGV[1]
+    topic_banch = ARGV[1]
+else
+    topic_banch = 'HEAD'
+end
+
+tarject_shas = `git rev-list #{base_branch}...#{topic_banch}`.split("\n")
+remote_ref   = `git branch -r`.split("\n").map { |e| e.strip}
+tarject_shas.each do |each_sha|
+remote_ref.each do |each_ref|
+    sha_pushed = `git rev-list ^#{each_sha}^@ ref/remotes/#{each_ref}`.split("\n")
+    if !sha_pushed.include?(each_sha)
+        puts "[Politica] El commit #{each_sha} ya ha sido pusheado hacia #{each_ref}"
+        exit 1
+    end
+end
+end
+
+# import commands
+# import sys
+# import os
+
+# from collections import defaultdict
+
+# user = os.getenv('USER')
+
+# def get_acl(acl_path):
+#     file = open(acl_path, 'r')
+#     acl_list = split(file.read())
+#     file.close()
+#     acl_dict = defaultdict(list)
+#     for eachline in acl_list:
+#         eachline = defaultdict(str, **dict(enumerate(split(eachline, '|'))))
+#         avail, users, path = eachline[0], eachline[1], eachline[2]
+#         if avail != 'avail': continue
+#         for usereach in split(users, ','):
+#             acl_dict[usereach].append(path)
+#     return acl_dict
+
+# def split(str_input, charsplit='\n'):
+#     return filter(None, map(str.strip, str_input.split(charsplit)))
+
+# def check_directory_perms():
+#     acl = get_acl('.git/acl')
+#     if user not in acl:
+#         print('USER: {} no se encuentra configurado en los permisos'.format(user))
+#         sys.exit(1)
+
+#     for fullpath in split(system('git diff-index --cached --name-only HEAD')):
+#         filepath, _ = os.path.split(fullpath)
+#         has_file_access = False
+#         for acl_path in acl[user]:
+#             if acl_path.find(filepath) == -1:continue
+#             has_file_access = True
+
+#         if not has_file_access:
+#             print '[Politica] Tu no tienes permisos para hacer push a {}'.format(fullpath)
+#             sys.exit(1)
+
+# def system(command):
+#     code, output = commands.getstatusoutput(command)
+#     if code == 0: return output
+#     print('Error codigo: {} al ejecutar comando: {}'.format(code, command))
+#     sys.exit(1)
+
+# def check_fast_forward():
+#     argv = defaultdict(str, **dict(enumerate(sys.argv[1:])))
+#     base_branch = argv[0]
+#     if argv[1]:
+#         topic_banch = argv[1]
+#     else:
+#         topic_banch = 'HEAD'
+#     tarject_shas = split(system('git rev-list {}...{}'.format(base_branch, topic_banch)))
+#     remote_ref   = split(system('git branch -r'))
+#     for each_sha in tarject_shas:
+#         for each_ref in remote_ref:
+#             sha_pushed = split('git rev-list ^{}^@ ref/remotes/{}'.format(each_sha, each_ref))
+#             if each_sha in sha_pushed:
+#                 print('[Politica] El commit {} ya ha sido pusheado hacia {each_ref}'.format(each_sha, each_ref))
+#                 sys.exit(1)
+
+# if __name__ == '__main__':
+#     check_directory_perms()
+#     check_fast_forward()
+#     sys.exit(0)
+
